@@ -73,6 +73,10 @@ class CourseController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json($courses);
+        }
+
         return view('courses', compact('courses'));
     }
 
@@ -123,7 +127,7 @@ class CourseController extends Controller
         return redirect()->route('my-courses')->with('success', 'Course has been enrolled successfully!');
     }
 
-    public function myCourses()
+    public function myCourses(Request $request)
     {
         if (!Auth::guard('student')->check()) {
             return redirect()->route('login');
@@ -155,6 +159,13 @@ class CourseController extends Controller
                 $class->forceFill($cData);
                 return $class;
             });
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'enrolledContents' => $enrolledContents,
+                'classes' => $classes
+            ]);
+        }
 
         return view('my_courses', compact('enrolledContents', 'classes'));
     }

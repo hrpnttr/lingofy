@@ -119,11 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (data.redirect) {
-                if (typeof navigateTo === 'function') {
-                    navigateTo(data.redirect);
-                } else {
-                    window.location.href = data.redirect;
-                }
+                window.location.href = data.redirect;
             }
         })
         .catch(error => {

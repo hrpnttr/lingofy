@@ -37,6 +37,13 @@ class QuizController extends Controller
             }
         }
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'quizzes' => $quizzes,
+                'activeTest' => $activeTest
+            ]);
+        }
+
         return view('placement_test', compact('quizzes', 'seq', 'activeTest'));
     }
 
@@ -56,12 +63,21 @@ class QuizController extends Controller
             $quiz->forceFill($quizData);
         }
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'quiz' => $quiz
+            ]);
+        }
+
         return view('started', compact('quiz'));
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         if (!Auth::guard('student')->check()) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
             return redirect()->route('login');
         }
 
@@ -73,6 +89,12 @@ class QuizController extends Controller
 
         $quiz = new Quiz();
         $quiz->forceFill($response->json());
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'quiz' => $quiz
+            ]);
+        }
 
         return view('quiz_show', compact('quiz'));
     }

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
         $response = Http::get("{$url}/users");
@@ -19,6 +19,12 @@ class UserController extends Controller
             $user->forceFill($data);
             return $user;
         });
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'users' => $users
+            ]);
+        }
 
         return view('users', compact('users'));
     }

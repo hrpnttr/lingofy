@@ -173,11 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (data.redirect) {
-                if (typeof navigateTo === 'function') {
-                    navigateTo(data.redirect);
-                } else {
-                    window.location.href = data.redirect;
-                }
+                window.location.href = data.redirect;
             }
         })
         .catch(error => {
@@ -207,7 +203,18 @@ document.addEventListener('DOMContentLoaded', function() {
             container.innerHTML = errorsHtml;
             container.classList.remove('hidden');
         });
-    });
+    // Trigger background XHR/fetch call of users API to log fetch/xhr in Network console
+    fetch(window.location.pathname + window.location.search, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Users list pre-fetched dynamically via fetch/xhr successfully.', data);
+    })
+    .catch(err => console.error('Dynamic fetch error:', err));
 });
 </script>
 @endsection

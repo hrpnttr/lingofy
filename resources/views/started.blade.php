@@ -65,4 +65,20 @@
         @endif
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch(window.location.pathname + window.location.search, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Quiz preview details pre-fetched dynamically via fetch/xhr successfully.', data);
+    })
+    .catch(err => console.error('Dynamic fetch error:', err));
+});
+</script>
 @endsection

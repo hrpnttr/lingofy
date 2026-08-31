@@ -40,7 +40,7 @@
     </div>
 
     <!-- Course Levels Section (Services block) -->
-    <div class="bg-blue-50/50 border-t border-b border-blue-100/50 py-12">
+    <div class="bg-blue-50/50 py-12">
         <div class="w-[80%] h-[100%] mx-auto">
             <div class="text-[#1F2937] mb-8">
                 <h2 class="font-bold text-3xl text-gray-900 tracking-tight">
@@ -51,7 +51,7 @@
             
             <div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-center">
                 <!-- A1 | A2 Card -->
-                <a href="{{ route('courses.index', ['level' => 'beginner']) }}" class="group bg-white border border-gray-100 relative rounded-2xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-[230px] overflow-hidden">
+                <a href="{{ route('courses.index', ['level' => 'beginner']) }}" class="group bg-white border border-gray-100 relative rounded-2xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start justify-between h-[230px] overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
                     <div class="bg-blue-50 text-blue-600 rounded-2xl w-14 h-14 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -66,9 +66,9 @@
                 </a>
 
                 <!-- B1 | B2 Card -->
-                <a href="{{ route('courses.index', ['level' => 'intermediate']) }}" class="group bg-white border border-gray-100 relative rounded-2xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-[230px] overflow-hidden">
+                <a href="{{ route('courses.index', ['level' => 'intermediate']) }}" class="group bg-white border border-gray-100 relative rounded-2xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start justify-between h-[230px] overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
-                    <div class="bg-indigo-50 text-indigo-600 rounded-2xl w-14 h-14 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                    <div class="bg-blue-50 text-indigo-600 rounded-2xl w-14 h-14 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M7 2a1 1 0 00-.707 1.707L7 4.414V7a1 1 0 00.293.707l5.414 5.414a1 1 0 001.414 0l1.414-1.414a1 1 0 000-1.414L10 4.828V3a1 1 0 00-1-1H7zm1 6V5.414L10.586 8H8zm-3 6a3 3 0 100-6 3 3 0 000 6zm9 3a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
                         </svg>
@@ -81,9 +81,9 @@
                 </a>
 
                 <!-- C1 | C2 Card -->
-                <a href="{{ route('courses.index', ['level' => 'advanced']) }}" class="group bg-white border border-gray-100 relative rounded-2xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-[230px] overflow-hidden">
+                <a href="{{ route('courses.index', ['level' => 'advanced']) }}" class="group bg-white border border-gray-100 relative rounded-2xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start justify-between h-[230px] overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-500 to-pink-500"></div>
-                    <div class="bg-purple-50 text-purple-600 rounded-2xl w-14 h-14 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
+                    <div class="bg-blue-50 text-purple-600 rounded-2xl w-14 h-14 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M7 2a1 1 0 00-.707 1.707L7 4.414V7a1 1 0 00.293.707l5.414 5.414a1 1 0 001.414 0l1.414-1.414a1 1 0 000-1.414L10 4.828V3a1 1 0 00-1-1H7zm1 6V5.414L10.586 8H8zm-3 6a3 3 0 100-6 3 3 0 000 6zm9 3a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
                         </svg>
@@ -113,17 +113,17 @@
             <img
                 src="/images/upscalemedia-transformed.png"
                 alt="Benefit 1"
-                class="w-full h-auto object-cover rounded-2xl shadow-lg border border-gray-150"
+                class="w-full h-auto object-cover rounded-2xl shadow-lg"
             />
         </div>
     </div>
 
-    <div class="py-12 w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-blue-50/60 border border-blue-100/50 px-8 rounded-3xl my-12 shadow-sm">
+    <div class="py-12 w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-blue-50/60 px-8 rounded-3xl my-12 shadow-sm">
         <div class="order-2 md:order-1">
             <img
                 src="/images/upscalemedia-transformed (1).png"
                 alt="Benefit 2"
-                class="w-full h-auto object-cover rounded-2xl shadow-lg border border-gray-150"
+                class="w-full h-auto object-cover rounded-2xl shadow-lg"
             />
         </div>
         <div class="order-1 md:order-2 text-left">

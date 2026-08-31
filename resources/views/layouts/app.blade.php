@@ -23,8 +23,8 @@
 <body class="antialiased min-h-screen flex flex-col justify-between">
 
     <!-- Navbar -->
-    <div id="navbar" class="fixed w-[100%] transition-all duration-300 z-[1000] bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <header class="mx-auto flex h-[9vh] w-[85%] items-center justify-between">
+    <div id="navbar" class="fixed w-[100%] transition-all duration-300 z-[1000] bg-white shadow-sm">
+        <header class="w-full max-w-6xl mx-auto px-6 md:px-8 flex h-20 items-center justify-between">
             <!-- Logo -->
             <div class="font-logo text-lg text-black">
                 <a href="{{ route('home') }}" class="flex items-center">
@@ -33,9 +33,9 @@
             </div>
 
             <!-- Desktop Navigation -->
-            <nav class="hidden items-center gap-10 text-base font-semibold md:flex text-gray-700" aria-label="Primary">
-                <a href="{{ route('placement-tests') }}" class="py-2 transition-colors duration-200 {{ request()->routeIs('placement-tests*') ? 'text-blue-600 border-b-2 border-blue-600' : 'hover:text-blue-600' }}">Placement Test</a>
-                <a href="{{ route('courses.index') }}" class="py-2 transition-colors duration-200 {{ request()->routeIs('courses.*') ? 'text-blue-600 border-b-2 border-blue-600' : 'hover:text-blue-600' }}">Courses</a>
+            <nav class="hidden items-center text-base font-semibold md:flex text-gray-700" aria-label="Primary">
+                <a href="{{ route('placement-tests') }}" style="margin-right: 2rem;" class="py-2 transition-colors duration-200 {{ request()->routeIs('placement-tests*') ? 'text-blue-600 border-b-2 border-blue-600' : 'hover:text-blue-600' }}">Placement Test</a>
+                <a href="{{ route('courses.index') }}" style="margin-right: 2rem;" class="py-2 transition-colors duration-200 {{ request()->routeIs('courses.*') ? 'text-blue-600 border-b-2 border-blue-600' : 'hover:text-blue-600' }}">Courses</a>
                 @if(Auth::guard('student')->check())
                     <a href="{{ route('my-courses') }}" class="py-2 transition-colors duration-200 {{ request()->routeIs('my-courses*') ? 'text-blue-600 border-b-2 border-blue-600' : 'hover:text-blue-600' }}">My Courses</a>
                 @endif
@@ -97,7 +97,7 @@
     </div>
 
     <!-- Main Content -->
-    <main id="main-content" class="flex-grow pt-[12vh]">
+    <main id="main-content" style="padding-top: 80px; padding-bottom: 80px;" class="flex-grow">
         @yield('content')
     </main>
 
@@ -189,102 +189,13 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.redirect) {
-                            navigateTo(data.redirect);
+                            window.location.href = data.redirect;
                         }
                     })
                     .catch(error => console.error('Logout error:', error));
                 });
             });
         });
-
-        // PJAX Router for handling page navigations using fetch/xhr GET requests
-        document.addEventListener('click', function(e) {
-            const link = e.target.closest('a');
-            if (!link) return;
-            
-            // Check if internal, same origin, non-anchor, non-javascript
-            if (link.origin !== window.location.origin) return;
-            const href = link.getAttribute('href');
-            if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
-            if (link.getAttribute('target') === '_blank') return;
-            
-            e.preventDefault();
-            navigateTo(link.href);
-        });
-
-        window.addEventListener('popstate', function() {
-            loadPage(window.location.href, false);
-        });
-
-        function navigateTo(url) {
-            loadPage(url, true);
-        }
-
-        function loadPage(url, pushState) {
-            fetch(url, {
-                headers: {
-                    'X-PJAX': 'true',
-                    'Accept': 'text/html',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    window.location.href = url;
-                    return;
-                }
-                return response.text();
-            })
-            .then(html => {
-                if (!html) return;
-                
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                document.title = doc.title;
-                
-                const currentMain = document.getElementById('main-content');
-                const newMain = doc.getElementById('main-content');
-                if (currentMain && newMain) {
-                    currentMain.innerHTML = newMain.innerHTML;
-                }
-                
-                // Update active link classes or navigation state if needed
-                // Note: since header is in layout and layout is not reloaded, 
-                // we can also update active nav indicator or hamburger state here.
-                const currentHeader = document.querySelector('header');
-                const newHeader = doc.querySelector('header');
-                if (currentHeader && newHeader) {
-                    currentHeader.innerHTML = newHeader.innerHTML;
-                }
-                const currentMobileMenu = document.getElementById('mobile-menu');
-                const newMobileMenu = doc.getElementById('mobile-menu');
-                if (currentMobileMenu && newMobileMenu) {
-                    currentMobileMenu.innerHTML = newMobileMenu.innerHTML;
-                }
-
-                if (pushState) {
-                    history.pushState(null, doc.title, url);
-                }
-                
-                window.scrollTo(0, 0);
-                
-                // Re-execute scripts in the newly loaded main element
-                if (newMain) {
-                    const scripts = newMain.querySelectorAll('script');
-                    scripts.forEach(oldScript => {
-                        const newScript = document.createElement('script');
-                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-                        oldScript.parentNode.replaceChild(newScript, oldScript);
-                    });
-                }
-            })
-            .catch(err => {
-                console.error('PJAX load error:', err);
-                window.location.href = url;
-            });
-        }
     </script>
 </body>
 </html>
