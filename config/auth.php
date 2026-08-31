@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'student' => [
+            'driver' => 'session',
+            'provider' => 'students',
+        ],
     ],
 
     /*
@@ -59,12 +63,17 @@ return [
     |
     | Supported: "database", "eloquent"
     |
+    |
     */
 
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'students' => [
+            'driver' => 'backend_students',
         ],
 
         // 'users' => [
