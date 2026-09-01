@@ -3,14 +3,14 @@
 @section('content')
     <div>
         <!-- Clean Typography Header -->
-        <div class="w-[80%] mx-auto pt-25 text-[#1F2937] text-left">
+        <div class="w-[90%] xl:w-[85%] 2xl:w-[80%] max-w-7xl mx-auto pt-10 text-[#1F2937] text-left">
             <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">My Classroom</h1>
             <p class="mt-2 text-gray-500 text-base font-medium">Continue your learning path and track your enrolled courses.
             </p>
         </div>
-        <br>
+        
         <!-- Enrolled Courses Content -->
-        <div class="w-[80%] mx-auto pb-20 pt-6 text-[#1F2937]">
+        <div class="w-[90%] xl:w-[85%] 2xl:w-[80%] max-w-7xl mx-auto pb-20 pt-6 text-[#1F2937]">
             @if (session('success'))
                 <div
                     class="p-4 mb-8 text-sm text-green-700 bg-green-50 border border-green-150 rounded-xl shadow-sm flex items-center gap-2">
@@ -24,10 +24,10 @@
             @endif
 
             @if (count($enrolledContents) > 0)
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                     <!-- Left Sidebar: Enrolled Courses List -->
-                    <div class="lg:col-span-1 bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3">
+                    <div class="lg:col-span-4 xl:col-span-3 bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3 lg:sticky lg:top-28">
                         <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">Enrolled Courses</h2>
                         @foreach ($enrolledContents as $index => $courseItem)
                             @php
@@ -47,7 +47,7 @@
                     </div>
 
                     <!-- Right Area: Course Classes and Materials -->
-                    <div class="lg:col-span-2">
+                    <div class="lg:col-span-8 xl:col-span-9">
                         @foreach ($enrolledContents as $index => $courseItem)
                             @php
                                 $courseId = $courseItem['courseId'] ?? '';
@@ -195,7 +195,7 @@
                                                                         <div id="media-{{ $materialId }}"
                                                                             class="hidden mt-4">
                                                                             <video controls width="100%"
-                                                                                class="rounded-xl shadow-md border border-gray-200 bg-black">
+                                                                                class="w-full aspect-video rounded-xl shadow-md border border-gray-200 bg-black">
                                                                                 <source
                                                                                     src="/videos/{{ $material['fileName'] }}"
                                                                                     type="video/mp4" />
@@ -207,11 +207,22 @@
                                                                     <!-- Embedded PDF -->
                                                                     @if (($material['type'] ?? '') === 'pdf' && isset($material['fileName']))
                                                                         <div id="media-{{ $materialId }}"
-                                                                            class="hidden mt-4 h-[70vh] rounded-xl overflow-hidden border border-gray-200">
-                                                                            <iframe
-                                                                                src="/documents/{{ $material['fileName'] }}#toolbar=1&navpanes=0"
-                                                                                class="h-full w-full bg-white border-0"
-                                                                                title="{{ $material['title'] ?? 'PDF Document' }}"></iframe>
+                                                                            class="hidden mt-4 space-y-2">
+                                                                            <div class="flex items-center justify-end gap-2 text-xs">
+                                                                                <a href="/documents/{{ $material['fileName'] }}" target="_blank"
+                                                                                    class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-semibold hover:underline">
+                                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                                                    </svg>
+                                                                                    Open in new tab
+                                                                                </a>
+                                                                            </div>
+                                                                            <div class="h-[75vh] min-h-[550px] rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                                                                                <iframe
+                                                                                    src="/documents/{{ $material['fileName'] }}#toolbar=1&navpanes=0"
+                                                                                    class="h-full w-full bg-white border-0"
+                                                                                    title="{{ $material['title'] ?? 'PDF Document' }}"></iframe>
+                                                                            </div>
                                                                         </div>
                                                                     @endif
                                                                 </div>

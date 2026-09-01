@@ -102,38 +102,163 @@
     </main>
 
     <!-- Footer -->
-    <footer class="pt-[2rem] pb-[1rem] justify-items-center bg-[#111827] text-white" id="footer">
-        <div class="w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[2rem] border-b-[1.4px] pb-5 border-gray-600 border-opacity-40">
-            <div>
-                <img src="/images/2_no.png" alt="Footer Logo" height="80" width="150" class="object-contain mb-3" />
-                <h1 class="text-[14px] opacity-70">
-                    Built with Laravel, Tailwind CSS, and SQLite
-                </h1>
-            </div>
-            <div class="md:mx-auto">
-                <h1 class="text-[14px] mt-[1rem] opacity-70">Let's connect:</h1>
-                <p class="mt-[0.5rem] underline font-semibold text-blue-400">
-                    adityariyan367@gmail.com
-                </p>
-            </div>
-            <div class="md:mx-auto">
-                <h1 class="font-semibold mb-[1.4rem] text-[14px]">Address</h1>
-                <div class="flex items-center mt-[1rem] space-x-2">
-                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
-                    <p class="text-[15px] font-normal">Bali, Indonesia</p>
+    <footer class="bg-white border-t border-gray-150 text-gray-700" id="footer">
+        <div class="w-[90%] xl:w-[85%] 2xl:w-[80%] max-w-7xl mx-auto pt-16 pb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+                
+                <!-- Brand & Mission Column -->
+                <div class="lg:col-span-4 space-y-4 text-left">
+                    <a href="{{ route('home') }}" class="inline-block transition-transform duration-200 hover:scale-102">
+                        <img src="/images/2_no.png" alt="Lingofy Logo" width="130" height="60" class="object-contain" />
+                    </a>
+                    <p class="text-sm text-gray-500 leading-relaxed max-w-sm">
+                        Empowering language learners worldwide with interactive placement tests, structured courses, and real-time comprehension tracking.
+                    </p>
+                    <!-- Tech Stack Badges -->
+                    <div class="flex flex-wrap items-center gap-2 pt-1">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200/70 shadow-2xs">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Laravel
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200/70 shadow-2xs">
+                            <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span> Tailwind CSS
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200/70 shadow-2xs">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> SQLite
+                        </span>
+                    </div>
                 </div>
-                <div class="flex items-center mt-[1rem] space-x-2">
-                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
-                    <p class="text-[15px] font-normal">adityariyan367@gmail.com</p>
+
+                <!-- Navigation Column -->
+                <div class="lg:col-span-2 space-y-3 text-left">
+                    <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Navigation</h3>
+                    <ul class="space-y-2.5 text-sm">
+                        <li>
+                            <a href="{{ route('home') }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150">
+                                Home
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('placement-tests') }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150">
+                                Placement Test
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('courses.index') }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150">
+                                Courses
+                            </a>
+                        </li>
+                        @if(Auth::guard('student')->check())
+                            <li>
+                                <a href="{{ route('my-courses') }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150">
+                                    My Courses
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('profile') }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150">
+                                    My Profile
+                                </a>
+                            </li>
+                        @else
+                            <li>
+                                <a href="{{ route('login') }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150">
+                                    Login
+                                </a>
+                            </li>
+                        @endif
+                    </ul>
                 </div>
-                <div class="flex items-center mt-[1rem] space-x-2">
-                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.3 11.3 0 005.455 5.455l.773-1.548a1 1 0 011.06-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg>
-                    <p class="text-[15px] font-normal">+62 8822 8163 162</p>
+
+                <!-- Course Levels Column -->
+                <div class="lg:col-span-3 space-y-3 text-left">
+                    <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Course Levels</h3>
+                    <ul class="space-y-2.5 text-sm">
+                        <li>
+                            <a href="{{ route('courses.index', ['level' => 'beginner']) }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Beginner (A1 - A2)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('courses.index', ['level' => 'intermediate']) }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                Intermediate (B1 - B2)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('courses.index', ['level' => 'advanced']) }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                                Advanced (C1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('placement-tests') }}" class="text-gray-500 hover:text-blue-600 font-medium transition-colors duration-150 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                Assessment Tests
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Contact Column -->
+                <div class="lg:col-span-3 space-y-3 text-left">
+                    <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Contact</h3>
+                    <div class="space-y-3 pt-1">
+                        <!-- Location -->
+                        <div class="flex items-center gap-3 text-sm text-gray-600">
+                            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Bali, Indonesia</p>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <a href="mailto:adityariyan367@gmail.com" class="group flex items-center gap-3 text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-medium text-gray-800 group-hover:text-blue-600 truncate">adityariyan367@gmail.com</p>
+                            </div>
+                        </a>
+
+                        <!-- Phone -->
+                        <a href="tel:+6288228163162" class="group flex items-center gap-3 text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800 group-hover:text-blue-600">+62 8822 8163 162</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Copyright Bar -->
+            <div class="mt-12 pt-6 border-t border-gray-150 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 font-medium">
+                <div>
+                    &copy; {{ date('Y') }} Aditya Farid Riyan Wijaya. All Rights Reserved.
+                </div>
+                <div class="flex items-center gap-4">
+                    <span>Designed &amp; Built for Lingofy</span>
+                    <button onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" class="inline-flex items-center gap-1 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer border-0 bg-transparent">
+                        <span>Top</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
-        </div>
-        <div class="mt-[1.4rem] w-[80%] mx-auto opacity-80 text-center md:text-left">
-            &#169; 2026 Aditya Farid Riyan Wijaya | All Rights Reserved
         </div>
     </footer>
 
