@@ -28,7 +28,7 @@
             <!-- Logo -->
             <div class="font-logo text-lg text-black">
                 <a href="{{ route('home') }}" class="flex items-center">
-                    <img src="/images/2_no.png" alt="Logo" width="130" height="70" class="object-contain transition-transform duration-200 hover:scale-105" />
+                    <img src="/images/2_no.png" alt="Logo" class="h-10 w-auto object-contain transition-transform duration-200 hover:scale-105" />
                 </a>
             </div>
 
@@ -103,29 +103,17 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-150 text-gray-700" id="footer">
-        <div class="w-[90%] xl:w-[85%] 2xl:w-[80%] max-w-7xl mx-auto pt-16 pb-12">
+        <div class="w-[90%] xl:w-[85%] 2xl:w-[80%] max-w-7xl mx-auto pt-12 pb-10">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
                 
                 <!-- Brand & Mission Column -->
-                <div class="lg:col-span-4 space-y-4 text-left">
-                    <a href="{{ route('home') }}" class="inline-block transition-transform duration-200 hover:scale-102">
-                        <img src="/images/2_no.png" alt="Lingofy Logo" width="130" height="60" class="object-contain" />
+                <div class="lg:col-span-4 text-left">
+                    <a href="{{ route('home') }}" class="inline-block transition-transform duration-200 hover:scale-105">
+                        <img src="/images/2_no.png" alt="Lingofy Logo" class="h-9 w-auto object-contain" />
                     </a>
-                    <p class="text-sm text-gray-500 leading-relaxed max-w-sm">
+                    <p class="mt-3 text-sm text-gray-500 leading-relaxed max-w-sm">
                         Empowering language learners worldwide with interactive placement tests, structured courses, and real-time comprehension tracking.
                     </p>
-                    <!-- Tech Stack Badges -->
-                    <div class="flex flex-wrap items-center gap-2 pt-1">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200/70 shadow-2xs">
-                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Laravel
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200/70 shadow-2xs">
-                            <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span> Tailwind CSS
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200/70 shadow-2xs">
-                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> SQLite
-                        </span>
-                    </div>
                 </div>
 
                 <!-- Navigation Column -->
@@ -245,7 +233,7 @@
             </div>
 
             <!-- Bottom Copyright Bar -->
-            <div class="mt-12 pt-6 border-t border-gray-150 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 font-medium">
+            <div class="mt-10 pt-6 border-t border-gray-150 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 font-medium">
                 <div>
                     &copy; {{ date('Y') }} Aditya Farid Riyan Wijaya. All Rights Reserved.
                 </div>
