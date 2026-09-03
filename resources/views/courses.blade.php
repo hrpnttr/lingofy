@@ -161,6 +161,47 @@
             @endif
         </div>
     </div>
+
+    <!-- Login Required Modal Popup -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="login-modal-title" role="dialog" aria-modal="true">
+        <!-- Backdrop -->
+        <div id="login-modal-backdrop" class="fixed inset-0 bg-gray-900/50 backdrop-blur-xs transition-opacity"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <div class="relative transform overflow-hidden rounded-2xl bg-white p-6 text-center shadow-2xl transition-all w-full max-w-sm border border-gray-100">
+                <!-- Icon -->
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-4">
+                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+
+                <!-- Text Content -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900" id="login-modal-title">Please Login</h3>
+                    <p class="mt-2 text-sm text-gray-600 font-medium">Please login first to enroll courses</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 flex flex-col gap-2.5">
+                    <button
+                        type="button"
+                        id="login-modal-ok-btn"
+                        class="w-full inline-flex justify-center items-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors cursor-pointer border-0"
+                    >
+                        OK
+                    </button>
+                    <button
+                        type="button"
+                        id="login-modal-cancel-btn"
+                        class="w-full inline-flex justify-center items-center rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-200 focus:outline-none transition-colors cursor-pointer border-0"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -365,6 +406,44 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchCourses('');
     };
 
+    // Login Modal Elements & Handlers
+    const loginModal = document.getElementById('login-modal');
+    const loginModalOkBtn = document.getElementById('login-modal-ok-btn');
+    const loginModalCancelBtn = document.getElementById('login-modal-cancel-btn');
+    const loginModalBackdrop = document.getElementById('login-modal-backdrop');
+    let loginRedirectUrl = '{{ route("login") }}';
+
+    function showLoginModal(redirectUrl) {
+        if (redirectUrl) {
+            loginRedirectUrl = redirectUrl;
+        }
+        loginModal.classList.remove('hidden');
+    }
+
+    function hideLoginModal() {
+        loginModal.classList.add('hidden');
+    }
+
+    if (loginModalOkBtn) {
+        loginModalOkBtn.addEventListener('click', function() {
+            window.location.href = loginRedirectUrl;
+        });
+    }
+
+    if (loginModalCancelBtn) {
+        loginModalCancelBtn.addEventListener('click', hideLoginModal);
+    }
+
+    if (loginModalBackdrop) {
+        loginModalBackdrop.addEventListener('click', hideLoginModal);
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && loginModal && !loginModal.classList.contains('hidden')) {
+            hideLoginModal();
+        }
+    });
+
     // Enroll Form dynamic intercepts (Event Delegation)
     document.addEventListener('submit', function(e) {
         const form = e.target.closest('.enroll-form');
@@ -372,26 +451,51 @@ document.addEventListener('DOMContentLoaded', function() {
         
         e.preventDefault();
         
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnHtml = submitBtn ? submitBtn.innerHTML : null;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+
+        const tokenInput = form.querySelector('input[name="_token"]');
+        const token = tokenInput ? tokenInput.value : (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+
         fetch(form.action, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                'X-CSRF-TOKEN': token,
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => {
-            if (response.ok) return response.json();
-            return response.json().then(errData => { throw errData; });
-        })
-        .then(data => {
+        .then(async response => {
+            const data = await response.json().catch(() => ({}));
+
+            if (response.status === 401) {
+                showLoginModal(data.redirect || '{{ route("login") }}');
+                return;
+            }
+
+            if (!response.ok) {
+                throw data;
+            }
+
             if (data.redirect) {
                 window.location.href = data.redirect;
             }
         })
         .catch(error => {
+            if (!error) return;
             console.error('Enrollment error:', error);
-            alert(error.errors && error.errors.error ? error.errors.error[0] : 'Failed to enroll course. Please try again.');
+            alert(error.errors && error.errors.error ? error.errors.error[0] : (error.message || 'Failed to enroll course. Please try again.'));
+        })
+        .finally(() => {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                if (originalBtnHtml) submitBtn.innerHTML = originalBtnHtml;
+            }
         });
     });
 });

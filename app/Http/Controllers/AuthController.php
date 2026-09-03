@@ -120,6 +120,10 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        if ($request->wantsJson()) {
+            return response()->json(['redirect' => route('login')]);
+        }
+
         return redirect()->route('login');
     }
 

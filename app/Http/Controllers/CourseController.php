@@ -84,9 +84,12 @@ class CourseController extends Controller
     {
         if (!Auth::guard('student')->check()) {
             if ($request->wantsJson()) {
-                return response()->json(['redirect' => route('login')], 401);
+                return response()->json([
+                    'message' => 'Please login first to enroll courses',
+                    'redirect' => route('login')
+                ], 401);
             }
-            return redirect()->route('login');
+            return redirect()->route('login')->withErrors(['error' => 'Please login first to enroll courses']);
         }
 
         $studentId = Auth::guard('student')->id();

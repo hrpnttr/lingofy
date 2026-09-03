@@ -21,6 +21,7 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name
 Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
+Route::redirect('/course', '/courses');
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::post('/courses/{id}/enroll', [CourseController::class, 'enroll'])->name('courses.enroll');
 
