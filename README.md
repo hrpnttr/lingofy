@@ -7,6 +7,19 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Deploying on Vercel
+
+This is a server-rendered Laravel app, not a static Vite site. `Dockerfile.vercel` builds the Vite assets and runs Laravel with FrankenPHP; `vercel.json` selects Vercel's container runtime so deployment does not expect a `dist` directory.
+
+Set these Vercel environment variables for the target environment before deploying:
+
+- `APP_KEY` — generate once with `php artisan key:generate --show` and store the result in Vercel.
+- `APP_URL` — the deployed student-site URL.
+- `BACKEND_API_URL` — a publicly reachable deployment of `lingofy-backend`, ending in `/api`. A local URL such as `127.0.0.1:8080` will not be reachable from Vercel.
+- `TENANT_SLUG` — the tenant used by this student site, such as `lingofy`.
+
+The container uses cookie sessions and in-memory cache because Vercel instances do not have durable local storage. Keep the student API and its database deployed separately with durable storage. If Vercel Project Settings have a manual Build Command or Output Directory such as `dist`, clear those overrides and redeploy.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
