@@ -8,7 +8,7 @@
             <p class="mt-2 text-gray-500 text-base font-medium">Continue your learning path and track your enrolled courses.
             </p>
         </div>
-        
+
         <!-- Enrolled Courses Content -->
         <div class="w-[90%] xl:w-[85%] 2xl:w-[80%] max-w-7xl mx-auto pb-20 pt-6 text-[#1F2937]">
             @if (session('success'))
@@ -27,7 +27,8 @@
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                     <!-- Left Sidebar: Enrolled Courses List -->
-                    <div class="lg:col-span-4 xl:col-span-3 bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3 lg:sticky lg:top-28">
+                    <div
+                        class="lg:col-span-4 xl:col-span-3 bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3 lg:sticky lg:top-28">
                         <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">Enrolled Courses</h2>
                         @foreach ($enrolledContents as $index => $courseItem)
                             @php
@@ -96,11 +97,89 @@
                                                 <!-- Materials list -->
                                                 <div class="p-6 text-left">
                                                     <div class="space-y-4">
-                                                        @if (is_array($classItem->materials) && count($classItem->materials) > 0)
-                                                            @foreach ($classItem->materials as $mIndex => $material)
+                                                        @php
+                                                            $studentMaterials = [];
+                                                            if (is_array($classItem->materials)) {
+                                                                $studentMaterials = array_values(
+                                                                    array_filter(
+                                                                        $classItem->materials,
+                                                                        fn($material) => !is_array($material) ||
+                                                                            ($material['type'] ?? '') !== 'video' ||
+                                                                            !empty($material['url']) ||
+                                                                            !empty($material['link']),
+                                                                    ),
+                                                                );
+                                                            }
+                                                        @endphp
+                                                        @if (count($studentMaterials) > 0)
+                                                            @foreach ($studentMaterials as $mIndex => $material)
                                                                 @php
                                                                     $materialId =
                                                                         'material-' . $classItem->id . '-' . $mIndex;
+                                                                    $videoUrl =
+                                                                        $material['url'] ?? ($material['link'] ?? null);
+                                                                    $youtubeEmbedUrl = null;
+                                                                    $videoHost = strtolower(
+                                                                        (string) parse_url(
+                                                                            $videoUrl ?? '',
+                                                                            PHP_URL_HOST,
+                                                                        ),
+                                                                    );
+                                                                    $youtubeId = null;
+                                                                    if (
+                                                                        in_array(
+                                                                            $videoHost,
+                                                                            [
+                                                                                'youtube.com',
+                                                                                'www.youtube.com',
+                                                                                'm.youtube.com',
+                                                                                'youtu.be',
+                                                                                'www.youtu.be',
+                                                                            ],
+                                                                            true,
+                                                                        )
+                                                                    ) {
+                                                                        $videoPath = trim(
+                                                                            (string) parse_url($videoUrl, PHP_URL_PATH),
+                                                                            '/',
+                                                                        );
+                                                                        parse_str(
+                                                                            (string) parse_url(
+                                                                                $videoUrl,
+                                                                                PHP_URL_QUERY,
+                                                                            ),
+                                                                            $videoQuery,
+                                                                        );
+                                                                        $candidateId =
+                                                                            $videoHost === 'youtu.be' ||
+                                                                            $videoHost === 'www.youtu.be'
+                                                                                ? explode('/', $videoPath)[0]
+                                                                                : $videoQuery['v'] ??
+                                                                                    (preg_match(
+                                                                                        '~^(?:embed|shorts|live)/([^/]+)~',
+                                                                                        $videoPath,
+                                                                                        $matches,
+                                                                                    )
+                                                                                        ? $matches[1]
+                                                                                        : null);
+                                                                        $youtubeId =
+                                                                            is_string($candidateId) &&
+                                                                            preg_match(
+                                                                                '/^[A-Za-z0-9_-]{11}$/',
+                                                                                $candidateId,
+                                                                            )
+                                                                                ? $candidateId
+                                                                                : null;
+                                                                        if ($youtubeId) {
+                                                                            $youtubeEmbedUrl =
+                                                                                'https://www.youtube.com/embed/' .
+                                                                                $youtubeId .
+                                                                                '?enablejsapi=1&origin=' .
+                                                                                urlencode(
+                                                                                    request()->getSchemeAndHttpHost(),
+                                                                                );
+                                                                        }
+                                                                    }
                                                                 @endphp
                                                                 <div
                                                                     class="rounded-xl border border-gray-100 bg-white p-4 hover:border-gray-200 hover:shadow-sm transition-all duration-200">
@@ -166,6 +245,8 @@
                                                                                         Watch video lecture
                                                                                     @elseif(($material['type'] ?? '') === 'pdf')
                                                                                         Read PDF module
+                                                                                    @elseif(($material['type'] ?? '') === 'link')
+                                                                                        Open learning resource
                                                                                     @else
                                                                                         Solve homework test
                                                                                     @endif
@@ -181,45 +262,87 @@
                                                                                     class="shrink-0 rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none cursor-pointer border-0">
                                                                                     Start
                                                                                 </button>
-                                                                            @else
+                                                                            @elseif(($material['type'] ?? '') === 'quiz')
                                                                                 <a href="{{ route('quizzes.started', ['id' => $classItem->id]) }}"
                                                                                     class="inline-block shrink-0 rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none cursor-pointer text-center font-sans">
                                                                                     Start
+                                                                                </a>
+                                                                            @elseif(($material['type'] ?? '') === 'link' && !empty($material['url']))
+                                                                                <a href="{{ $material['url'] }}"
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    class="inline-block shrink-0 rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none cursor-pointer text-center font-sans">
+                                                                                    Open
                                                                                 </a>
                                                                             @endif
                                                                         </div>
                                                                     </div>
 
                                                                     <!-- Embedded Video -->
-                                                                    @if (($material['type'] ?? '') === 'video' && isset($material['fileName']))
+                                                                    @if (($material['type'] ?? '') === 'video' && $videoUrl)
                                                                         <div id="media-{{ $materialId }}"
                                                                             class="hidden mt-4">
-                                                                            <video controls width="100%"
-                                                                                class="w-full aspect-video rounded-xl shadow-md border border-gray-200 bg-black">
-                                                                                <source
-                                                                                    src="/videos/{{ $material['fileName'] }}"
-                                                                                    type="video/mp4" />
-                                                                                Your browser does not support the video tag.
-                                                                            </video>
+                                                                            @if ($youtubeId)
+                                                                                <iframe src="{{ $youtubeEmbedUrl }}"
+                                                                                    data-video-source="{{ $youtubeEmbedUrl }}"
+                                                                                    title="{{ $material['title'] ?? 'Class video' }}"
+                                                                                    class="w-full aspect-video rounded-xl shadow-md border border-gray-200 bg-black"
+                                                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                                                    referrerpolicy="unsafe-url"
+                                                                                    allowfullscreen></iframe>
+                                                                                <a href="{{ $videoUrl }}"
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    class="mt-2 inline-block text-xs text-blue-600 hover:underline">Open
+                                                                                    on YouTube</a>
+                                                                            @else
+                                                                                <video src="{{ $videoUrl }}" controls
+                                                                                    preload="metadata" playsinline
+                                                                                    width="100%"
+                                                                                    class="w-full aspect-video rounded-xl shadow-md border border-gray-200 bg-black">
+                                                                                    Your browser cannot play this video URL.
+                                                                                    <a href="{{ $videoUrl }}"
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        class="text-blue-600 underline">Open
+                                                                                        the video directly</a>.
+                                                                                </video>
+                                                                                <a href="{{ $videoUrl }}"
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    class="mt-2 inline-block text-xs text-blue-600 hover:underline">Open
+                                                                                    video in a new tab</a>
+                                                                            @endif
                                                                         </div>
                                                                     @endif
 
                                                                     <!-- Embedded PDF -->
-                                                                    @if (($material['type'] ?? '') === 'pdf' && isset($material['fileName']))
+                                                                    @if (($material['type'] ?? '') === 'pdf' && (isset($material['url']) || isset($material['fileName'])))
                                                                         <div id="media-{{ $materialId }}"
                                                                             class="hidden mt-4 space-y-2">
-                                                                            <div class="flex items-center justify-end gap-2 text-xs">
-                                                                                <a href="/documents/{{ $material['fileName'] }}" target="_blank"
+                                                                            <div
+                                                                                class="flex items-center justify-end gap-2 text-xs">
+                                                                                <a href="{{ $material['url'] ?? '/documents/' . rawurlencode($material['fileName']) }}"
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
                                                                                     class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-semibold hover:underline">
-                                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                                                    <svg class="w-4 h-4" fill="none"
+                                                                                        stroke="currentColor"
+                                                                                        viewBox="0 0 24 24"
+                                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path stroke-linecap="round"
+                                                                                            stroke-linejoin="round"
+                                                                                            stroke-width="2"
+                                                                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                                                                        </path>
                                                                                     </svg>
                                                                                     Open in new tab
                                                                                 </a>
                                                                             </div>
-                                                                            <div class="h-[75vh] min-h-[550px] rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                                                                            <div
+                                                                                class="h-[75vh] min-h-[550px] rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                                                                                 <iframe
-                                                                                    src="/documents/{{ $material['fileName'] }}#toolbar=1&navpanes=0"
+                                                                                    src="{{ $material['url'] ?? '/documents/' . rawurlencode($material['fileName']) }}#toolbar=1&navpanes=0"
                                                                                     class="h-full w-full bg-white border-0"
                                                                                     title="{{ $material['title'] ?? 'PDF Document' }}"></iframe>
                                                                             </div>
@@ -290,6 +413,8 @@
 
             if (targetMedia.classList.contains('hidden')) {
                 targetMedia.classList.remove('hidden');
+                const videoEmbed = targetMedia.querySelector('[data-video-source]');
+                if (videoEmbed && videoEmbed.src === 'about:blank') videoEmbed.src = videoEmbed.dataset.videoSource;
                 targetBtn.textContent = 'Hide';
                 targetBtn.classList.remove('bg-blue-600', 'hover:bg-blue-750');
                 targetBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
@@ -303,6 +428,8 @@
                 if (video) {
                     video.pause();
                 }
+                const videoEmbed = targetMedia.querySelector('[data-video-source]');
+                if (videoEmbed) videoEmbed.src = 'about:blank';
             }
         }
 

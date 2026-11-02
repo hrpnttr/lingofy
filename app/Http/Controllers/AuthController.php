@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -15,6 +13,7 @@ class AuthController extends Controller
         if (Auth::guard('student')->check()) {
             return redirect()->route('profile');
         }
+
         return view('auth.login');
     }
 
@@ -30,12 +29,13 @@ class AuthController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['redirect' => route('profile')]);
             }
+
             return redirect()->route('profile');
         }
 
         if ($request->wantsJson()) {
             return response()->json([
-                'errors' => ['error' => ['Login failed. Please check your credentials and try again.']]
+                'errors' => ['error' => ['Login failed. Please check your credentials and try again.']],
             ], 422);
         }
 
@@ -49,6 +49,7 @@ class AuthController extends Controller
         if (Auth::guard('student')->check()) {
             return redirect()->route('profile');
         }
+
         return view('auth.register');
     }
 
@@ -64,17 +65,18 @@ class AuthController extends Controller
         $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
 
         // Check if email already exists
-        $check = Http::post("{$url}/students/by-email", ['email' => $data['email']]);
+        $check = $this->backendApi()->post("{$url}/students/by-email", ['email' => $data['email']]);
         if ($check->successful()) {
             if ($request->wantsJson()) {
                 return response()->json([
-                    'errors' => ['email' => ['The email has already been taken.']]
+                    'errors' => ['email' => ['The email has already been taken.']],
                 ], 422);
             }
+
             return back()->withErrors(['email' => 'The email has already been taken.'])->withInput();
         }
 
-        $response = Http::post("{$url}/students", [
+        $response = $this->backendApi()->post("{$url}/students", [
             'full_name' => $data['full_name'],
             'phone' => $data['phone'],
             'email' => $data['email'],
@@ -84,21 +86,22 @@ class AuthController extends Controller
         if ($response->failed()) {
             if ($request->wantsJson()) {
                 return response()->json([
-                    'errors' => ['error' => ['Registration failed. Please try again.']]
+                    'errors' => ['error' => ['Registration failed. Please try again.']],
                 ], 422);
             }
+
             return back()->withErrors(['error' => 'Registration failed. Please try again.'])->withInput();
         }
 
         $studentData = $response->json();
-        $student = new Student();
+        $student = new Student;
         $student->forceFill($studentData);
         $student->exists = true;
 
         // Perform login to get token
-        $loginRes = Http::post("{$url}/students/login", [
+        $loginRes = $this->backendApi()->post("{$url}/students/login", [
             'email' => $data['email'],
-            'password' => $data['password']
+            'password' => $data['password'],
         ]);
         if ($loginRes->successful() && isset($loginRes->json()['accessToken'])) {
             session(['backend_access_token' => $loginRes->json()['accessToken']]);
@@ -137,18 +140,19 @@ class AuthController extends Controller
         $request->validate(['email' => 'required|email']);
 
         $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
-        $response = Http::post("{$url}/students/forgot-password", ['email' => $request->email]);
+        $response = $this->backendApi()->post("{$url}/students/forgot-password", ['email' => $request->email]);
 
         if ($response->successful()) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => true]);
             }
+
             return back()->with('success', true);
         }
 
         if ($request->wantsJson()) {
             return response()->json([
-                'errors' => ['error' => ['Email not found. Please try again.']]
+                'errors' => ['error' => ['Email not found. Please try again.']],
             ], 422);
         }
 
@@ -168,7 +172,7 @@ class AuthController extends Controller
         ]);
 
         $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
-        $response = Http::post("{$url}/students/reset-password", [
+        $response = $this->backendApi()->post("{$url}/students/reset-password", [
             'email' => $request->email,
             'password' => $request->password,
         ]);
@@ -177,12 +181,13 @@ class AuthController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['redirect' => route('login'), 'status' => 'Password reset successfully!']);
             }
+
             return redirect()->route('login')->with('status', 'Password reset successfully!');
         }
 
         if ($request->wantsJson()) {
             return response()->json([
-                'errors' => ['email' => ['Email not found.']]
+                'errors' => ['email' => ['Email not found.']],
             ], 422);
         }
 

@@ -4,27 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\SchoolClass;
-use App\Models\Scourse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
     public function home()
     {
         $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
-        $response = Http::get("{$url}/courses", ['size' => 100]);
+        $response = $this->backendApi()->get("{$url}/courses", ['size' => 100]);
         $coursesData = $response->json()['content'] ?? [];
 
         $courses = collect($coursesData)
-            ->filter(fn($c) => $c['published'] ?? false)
+            ->filter(fn ($c) => $c['published'] ?? false)
             ->take(3)
             ->map(function ($cData) {
                 $cData['duration_hours'] = $cData['durationHours'] ?? 0;
-                $course = new Course();
+                $course = new Course;
                 $course->forceFill($cData);
+
                 return $course;
             });
 
@@ -38,7 +37,7 @@ class CourseController extends Controller
         $size = 10;
 
         $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
-        
+
         $params = [
             'page' => $backendPage,
             'size' => $size,
@@ -53,17 +52,18 @@ class CourseController extends Controller
             $params['language'] = $request->input('language');
         }
 
-        $response = Http::get("{$url}/courses", $params);
+        $response = $this->backendApi()->get("{$url}/courses", $params);
 
         $data = $response->json();
         $items = collect($data['content'] ?? [])->map(function ($itemData) {
             $itemData['duration_hours'] = $itemData['durationHours'] ?? 0;
-            $course = new Course();
+            $course = new Course;
             $course->forceFill($itemData);
+
             return $course;
         });
 
-        $filteredItems = $items->filter(fn($c) => $c->published);
+        $filteredItems = $items->filter(fn ($c) => $c->published);
 
         $courses = new LengthAwarePaginator(
             $filteredItems,
@@ -82,13 +82,14 @@ class CourseController extends Controller
 
     public function enroll(Request $request, $id)
     {
-        if (!Auth::guard('student')->check()) {
+        if (! Auth::guard('student')->check()) {
             if ($request->wantsJson()) {
                 return response()->json([
                     'message' => 'Please login first to enroll courses',
-                    'redirect' => route('login')
+                    'redirect' => route('login'),
                 ], 401);
             }
+
             return redirect()->route('login')->withErrors(['error' => 'Please login first to enroll courses']);
         }
 
@@ -96,30 +97,31 @@ class CourseController extends Controller
         $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
 
         // Fetch course from backend
-        $courseRes = Http::get("{$url}/courses/{$id}");
+        $courseRes = $this->backendApi()->get("{$url}/courses/{$id}");
         if ($courseRes->failed()) {
             abort(404);
         }
         $courseData = $courseRes->json();
 
         // Call enroll (POST api/scourses)
-        $enrollRes = Http::post("{$url}/scourses", [
+        $enrollRes = $this->backendApi()->post("{$url}/scourses", [
             'studentId' => (string) $studentId,
             'contents' => [
                 [
                     'courseId' => (string) $id,
                     'title' => $courseData['title'] ?? '',
-                ]
-            ]
+                ],
+            ],
         ]);
 
         // 409 means already enrolled, which is fine, we just proceed
         if ($enrollRes->failed() && $enrollRes->status() !== 409) {
             if ($request->wantsJson()) {
                 return response()->json([
-                    'errors' => ['error' => ['Failed to enroll course. Please try again.']]
+                    'errors' => ['error' => ['Failed to enroll course. Please try again.']],
                 ], 422);
             }
+
             return back()->withErrors(['error' => 'Failed to enroll course. Please try again.']);
         }
 
@@ -132,7 +134,7 @@ class CourseController extends Controller
 
     public function myCourses(Request $request)
     {
-        if (!Auth::guard('student')->check()) {
+        if (! Auth::guard('student')->check()) {
             return redirect()->route('login');
         }
 
@@ -140,7 +142,7 @@ class CourseController extends Controller
         $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
 
         // Get enrolled courses
-        $scourseRes = Http::get("{$url}/scourses/{$studentId}");
+        $scourseRes = $this->backendApi()->get("{$url}/scourses/{$studentId}");
         $enrolledContents = [];
         if ($scourseRes->successful() && $scourseRes->json()) {
             $enrolledContents = $scourseRes->json()['contents'] ?? [];
@@ -149,24 +151,25 @@ class CourseController extends Controller
         $enrolledCourseIds = collect($enrolledContents)->pluck('courseId')->toArray();
 
         // Fetch all classes
-        $classesRes = Http::get("{$url}/classes", ['size' => 100]);
+        $classesRes = $this->backendApi()->get("{$url}/classes", ['size' => 100]);
         $classesData = $classesRes->json()['content'] ?? [];
 
         // Filter and map to SchoolClass models
         $classes = collect($classesData)
             ->filter(function ($cData) use ($enrolledCourseIds) {
-                return in_array((string)($cData['course_id'] ?? ''), $enrolledCourseIds);
+                return in_array((string) ($cData['course_id'] ?? ''), $enrolledCourseIds);
             })
             ->map(function ($cData) {
-                $class = new SchoolClass();
+                $class = new SchoolClass;
                 $class->forceFill($cData);
+
                 return $class;
             });
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'enrolledContents' => $enrolledContents,
-                'classes' => $classes
+                'classes' => $classes,
             ]);
         }
 
