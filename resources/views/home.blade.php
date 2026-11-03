@@ -6,9 +6,11 @@
     <section class="relative w-full overflow-hidden">
         <div class="w-full relative h-[70vh] md:h-[80vh]">
             <img
-                src="/images/upscalemedia-transformed (3).png"
+                src="/images/home-hero.webp"
                 alt="Students studying together"
                 class="absolute inset-0 w-full h-full object-cover animate-fade-in"
+                fetchpriority="high"
+                decoding="async"
                 style="z-index: 1;"
             />
             <!-- Centered Text Overlay -->
@@ -111,9 +113,11 @@
         </div>
         <div>
             <img
-                src="/images/upscalemedia-transformed.png"
+                src="/images/home-benefit-science.webp"
                 alt="Benefit 1"
                 class="w-full h-auto object-cover rounded-2xl shadow-lg"
+                loading="lazy"
+                decoding="async"
             />
         </div>
     </div>
@@ -121,9 +125,11 @@
     <div class="py-12 w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-blue-50/60 px-8 rounded-3xl my-12 shadow-sm">
         <div class="order-2 md:order-1">
             <img
-                src="/images/upscalemedia-transformed (1).png"
+                src="/images/home-benefit-learning.webp"
                 alt="Benefit 2"
                 class="w-full h-auto object-cover rounded-2xl shadow-lg"
+                loading="lazy"
+                decoding="async"
             />
         </div>
         <div class="order-1 md:order-2 text-left">
