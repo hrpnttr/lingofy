@@ -19,21 +19,26 @@
                         name="q"
                         value="{{ request('q') }}"
                         placeholder="e.g. English, Beginner..."
-                        class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-gray-700 px-4 py-3 border text-sm"
+                        class="block w-full h-12 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-gray-700 px-4 py-0 border text-sm"
                     />
                 </div>
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Level</label>
+                <div class="relative">
                 <select
                     name="level"
-                    class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-gray-700 px-4 py-3 border text-sm capitalize"
+                    class="block w-full h-12 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-gray-700 pl-4 pr-10 py-0 border text-sm bg-white appearance-none cursor-pointer capitalize"
                 >
                     <option value="">All Levels</option>
                     <option value="beginner" {{ request('level') == 'beginner' ? 'selected' : '' }}>Beginner</option>
                     <option value="intermediate" {{ request('level') == 'intermediate' ? 'selected' : '' }}>Intermediate</option>
                     <option value="advanced" {{ request('level') == 'advanced' ? 'selected' : '' }}>Advanced</option>
                 </select>
+                <svg class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+                </div>
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Language</label>
@@ -42,13 +47,13 @@
                     name="language"
                     value="{{ request('language') }}"
                     placeholder="e.g. Spanish, English"
-                    class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-gray-700 px-4 py-3 border text-sm"
+                    class="block w-full h-12 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-gray-700 px-4 py-0 border text-sm"
                 />
             </div>
             <div class="flex gap-2">
                 <button
                     type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition duration-200 text-sm flex items-center justify-center gap-1.5 cursor-pointer border-0"
+                    class="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 rounded-xl shadow-md transition duration-200 text-sm flex items-center justify-center gap-1.5 cursor-pointer border-0"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -58,7 +63,7 @@
                 <a
                     id="clear-filters-btn"
                     href="{{ route('courses.index') }}"
-                    class="{{ request('q') || request('level') || request('language') ? '' : 'hidden' }} bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold p-3 rounded-xl transition duration-200 text-sm flex items-center justify-center cursor-pointer"
+                    class="{{ request('q') || request('level') || request('language') ? '' : 'hidden' }} bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold h-12 w-12 shrink-0 rounded-xl transition duration-200 text-sm flex items-center justify-center cursor-pointer"
                     title="Clear Filters"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

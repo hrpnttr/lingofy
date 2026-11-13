@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quiz;
+use App\Support\QuizSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,12 +17,7 @@ class QuizController extends Controller
 
         $quizzes = collect($quizzesData)
             ->filter(fn ($q) => is_null($q['class_id']))
-            ->map(function ($qData) {
-                $quiz = new Quiz;
-                $quiz->forceFill($qData);
-
-                return $quiz;
-            });
+            ->map(fn ($qData) => $this->studentQuiz($qData));
 
         // Handle showing a specific test detail based on query params
         $seq = $request->query('seq', null);
@@ -31,8 +27,7 @@ class QuizController extends Controller
         if ($previewId !== null) {
             $testData = collect($quizzesData)->first(fn ($q) => (string) ($q['id'] ?? '') === (string) $previewId);
             if ($testData) {
-                $activeTest = new Quiz;
-                $activeTest->forceFill($testData);
+                $activeTest = $this->studentQuiz($testData);
             }
         }
 
@@ -58,8 +53,7 @@ class QuizController extends Controller
 
         $quiz = null;
         if ($quizData) {
-            $quiz = new Quiz;
-            $quiz->forceFill($quizData);
+            $quiz = $this->studentQuiz($quizData);
         }
 
         if ($request->wantsJson() || $request->ajax()) {
@@ -87,8 +81,7 @@ class QuizController extends Controller
             abort(404);
         }
 
-        $quiz = new Quiz;
-        $quiz->forceFill($response->json());
+        $quiz = $this->studentQuiz($response->json() ?? []);
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -108,24 +101,82 @@ class QuizController extends Controller
         $studentId = Auth::guard('student')->id();
 
         $request->validate([
-            'score' => 'required|integer',
-            'answers' => 'required|array',
+            'responses' => 'present|array|max:500',
+            'responses.*' => 'array',
+            'responses.*.index' => 'required|integer|min:0',
+            'responses.*.value' => [
+                'present',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if ($value === null || is_string($value) || is_int($value) || is_float($value)) {
+                        if (is_string($value) && mb_strlen($value) > 20000) {
+                            $fail('The answer is too long.');
+                        }
+
+                        return;
+                    }
+                    if (is_array($value) && array_is_list($value)) {
+                        foreach ($value as $item) {
+                            if (! is_int($item) || $item < 0) {
+                                $fail('Selected choices must be a list of choice numbers.');
+
+                                return;
+                            }
+                        }
+
+                        return;
+                    }
+                    $fail('The answer has an invalid format.');
+                },
+            ],
         ]);
+
+        $responses = array_map(fn ($r) => [
+            'index' => (int) $r['index'],
+            'value' => $r['value'] ?? null,
+        ], array_values($request->input('responses', [])));
 
         $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
         $response = $this->backendApi()->post("{$url}/add-quizzes", [
             'studentId' => (string) $studentId,
             'quiz_id' => (string) $id,
-            'answers' => $request->input('answers'),
-            'score' => $request->input('score'),
+            'responses' => $responses,
         ]);
+
+        if ($response->status() === 422 || $response->status() === 404) {
+            $body = $response->json() ?? [];
+
+            return response()->json([
+                'error' => $body['message'] ?? 'Your answers could not be accepted.',
+                'errors' => $body['errors'] ?? [],
+            ], $response->status());
+        }
 
         if ($response->failed()) {
             return response()->json(['error' => 'Failed to submit quiz result.'], 500);
         }
 
-        $resultData = $response->json();
+        $resultData = $response->json() ?? [];
 
-        return response()->json(['success' => true, 'result_id' => $resultData['id'] ?? null]);
+        return response()->json([
+            'success' => true,
+            'result_id' => $resultData['id'] ?? null,
+            'score' => $resultData['score'] ?? null,
+            'points_earned' => $resultData['points_earned'] ?? null,
+            'points_max' => $resultData['points_max'] ?? null,
+            'pending_review' => (bool) ($resultData['pending_review'] ?? false),
+        ]);
+    }
+
+    /**
+     * Build a Quiz for student-facing output with answer keys removed.
+     */
+    private function studentQuiz(array $data): Quiz
+    {
+        $data['contens'] = QuizSanitizer::contents($data['contens'] ?? []);
+
+        $quiz = new Quiz;
+        $quiz->forceFill($data);
+
+        return $quiz;
     }
 }
