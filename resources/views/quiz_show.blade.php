@@ -438,6 +438,11 @@
             }
 
             submitting = false;
+            if (response.status === 409) {
+                alert(data.error || 'You have already submitted this quiz.');
+                window.location.reload();
+                return;
+            }
             if (response.status === 422) {
                 // Jump to the first question the server rejected, if it told us which.
                 const keys = Object.keys(data.errors || {});

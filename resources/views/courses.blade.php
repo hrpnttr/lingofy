@@ -207,6 +207,63 @@
             </div>
         </div>
     </div>
+
+    <!-- Payment Modal (payment provider integration pending) -->
+    <div id="payment-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="payment-modal-title" role="dialog" aria-modal="true">
+        <div id="payment-modal-backdrop" class="fixed inset-0 bg-gray-900/50 backdrop-blur-xs transition-opacity"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-md overflow-hidden rounded-2xl bg-white text-left shadow-2xl border border-gray-100">
+                <div class="flex items-start justify-between gap-4 px-6 pt-6">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Checkout</p>
+                        <h3 class="mt-1 text-xl font-bold text-gray-900" id="payment-modal-title">Complete your enrollment</h3>
+                    </div>
+                    <button type="button" data-close-payment class="rounded-lg bg-gray-100 px-2.5 py-1 text-lg leading-none text-gray-500 hover:bg-gray-200 cursor-pointer border-0" aria-label="Close">&times;</button>
+                </div>
+
+                <div class="px-6 pt-5">
+                    <div class="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                        <p id="payment-course-title" class="font-bold text-gray-900"></p>
+                        <p id="payment-course-meta" class="mt-1 text-xs font-medium text-gray-500 capitalize"></p>
+                        <div class="mt-4 flex items-center justify-between border-t border-gray-200 pt-3 text-sm">
+                            <span class="font-semibold text-gray-600">Total</span>
+                            <span id="payment-course-price" class="text-lg font-extrabold text-blue-600"></span>
+                        </div>
+                    </div>
+
+                    <fieldset class="mt-5">
+                        <legend class="text-sm font-bold text-gray-800">Payment method</legend>
+                        <div class="mt-2 grid gap-2" id="payment-methods">
+                            <label class="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                <input type="radio" name="payment_method" value="card" class="accent-blue-600" checked> Credit / debit card
+                            </label>
+                            <label class="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                <input type="radio" name="payment_method" value="bank_transfer" class="accent-blue-600"> Bank transfer
+                            </label>
+                            <label class="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                <input type="radio" name="payment_method" value="e_wallet" class="accent-blue-600"> E-wallet
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <p id="payment-unavailable-note" class="hidden mt-4 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-medium leading-relaxed text-amber-800">
+                        Online payment is coming soon. You can review the course price now; payment will be available here shortly.
+                    </p>
+                    <p id="payment-error" class="hidden mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium leading-relaxed text-red-700" role="alert"></p>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-2.5 border-t border-gray-100 px-6 py-5">
+                    <button type="button" id="payment-pay-btn" class="w-full inline-flex justify-center items-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors cursor-pointer border-0">
+                        Pay now
+                    </button>
+                    <button type="button" data-close-payment class="w-full inline-flex justify-center items-center rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-200 focus:outline-none transition-colors cursor-pointer border-0">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -449,6 +506,84 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Payment Modal (provider integration pending; see CheckoutController)
+    const paymentModal = document.getElementById('payment-modal');
+    const paymentPayBtn = document.getElementById('payment-pay-btn');
+    const paymentError = document.getElementById('payment-error');
+    const paymentUnavailableNote = document.getElementById('payment-unavailable-note');
+    let paymentCheckout = null;
+
+    function formatPrice(amount, currency) {
+        try {
+            return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency || 'USD' }).format(amount);
+        } catch (e) {
+            return `$${Number(amount).toFixed(2)}`;
+        }
+    }
+
+    function showPaymentModal(data) {
+        const course = data.course || {};
+        paymentCheckout = { url: data.checkout_url, course };
+        document.getElementById('payment-course-title').textContent = course.title || 'Course';
+        document.getElementById('payment-course-meta').textContent = [course.language, course.level].filter(Boolean).join(' · ');
+        document.getElementById('payment-course-price').textContent = formatPrice(course.price, course.currency);
+        paymentError.classList.add('hidden');
+        paymentError.textContent = '';
+        const enabled = Boolean(data.payments_enabled);
+        paymentUnavailableNote.classList.toggle('hidden', enabled);
+        paymentPayBtn.disabled = !enabled;
+        paymentPayBtn.textContent = enabled ? `Pay ${formatPrice(course.price, course.currency)}` : 'Payment coming soon';
+        paymentModal.classList.remove('hidden');
+        paymentModal.querySelector('[data-close-payment]')?.focus();
+    }
+
+    function hidePaymentModal() {
+        paymentModal.classList.add('hidden');
+        paymentCheckout = null;
+    }
+
+    paymentModal.querySelectorAll('[data-close-payment]').forEach((button) => button.addEventListener('click', hidePaymentModal));
+    document.getElementById('payment-modal-backdrop').addEventListener('click', hidePaymentModal);
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !paymentModal.classList.contains('hidden')) hidePaymentModal();
+    });
+
+    paymentPayBtn.addEventListener('click', async function() {
+        if (!paymentCheckout || !paymentCheckout.url) return;
+        const method = paymentModal.querySelector('input[name="payment_method"]:checked')?.value || 'card';
+        paymentPayBtn.disabled = true;
+        paymentError.classList.add('hidden');
+        try {
+            const response = await fetch(paymentCheckout.url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ payment_method: method })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (response.status === 401) {
+                hidePaymentModal();
+                showLoginModal(data.redirect);
+                return;
+            }
+            if (response.ok && data.payment_url) {
+                window.location.href = data.payment_url;
+                return;
+            }
+            paymentError.textContent = data.message || 'Payment could not be started. Please try again.';
+            paymentError.classList.remove('hidden');
+        } catch (e) {
+            paymentError.textContent = 'Payment could not be started. Please check your connection and try again.';
+            paymentError.classList.remove('hidden');
+        } finally {
+            paymentPayBtn.disabled = false;
+        }
+    });
+
     // Enroll Form dynamic intercepts (Event Delegation)
     document.addEventListener('submit', function(e) {
         const form = e.target.closest('.enroll-form');
@@ -479,6 +614,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.status === 401) {
                 showLoginModal(data.redirect || '{{ route("login") }}');
+                return;
+            }
+
+            if (response.status === 402 && data.code === 'payment_required') {
+                showPaymentModal(data);
                 return;
             }
 

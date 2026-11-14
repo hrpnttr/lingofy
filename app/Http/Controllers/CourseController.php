@@ -103,6 +103,31 @@ class CourseController extends Controller
         }
         $courseData = $courseRes->json();
 
+        // Paid courses are never enrolled directly; the student must go through checkout.
+        $price = (float) ($courseData['price'] ?? 0);
+        if ($price > 0) {
+            $payment = [
+                'code' => 'payment_required',
+                'message' => 'This is a paid course. Complete the payment to enroll.',
+                'course' => [
+                    'id' => $courseData['id'] ?? $id,
+                    'title' => $courseData['title'] ?? '',
+                    'level' => $courseData['level'] ?? null,
+                    'language' => $courseData['language'] ?? null,
+                    'price' => $price,
+                    'currency' => config('services.payments.currency'),
+                ],
+                'checkout_url' => route('courses.checkout', $id),
+                'payments_enabled' => config('services.payments.enabled'),
+            ];
+
+            if ($request->wantsJson()) {
+                return response()->json($payment, 402);
+            }
+
+            return redirect()->route('courses.index')->withErrors(['error' => $payment['message']]);
+        }
+
         // Call enroll (POST api/scourses)
         $enrollRes = $this->backendApi()->post("{$url}/scourses", [
             'studentId' => (string) $studentId,
@@ -149,6 +174,16 @@ class CourseController extends Controller
         }
 
         $enrolledCourseIds = collect($enrolledContents)->pluck('courseId')->toArray();
+
+        // Attach each enrolled course's current price for the "paid" badge.
+        $coursesRes = $this->backendApi()->get("{$url}/courses", ['size' => 100]);
+        $pricesById = collect($coursesRes->successful() ? ($coursesRes->json()['content'] ?? []) : [])
+            ->mapWithKeys(fn ($course) => [(string) ($course['id'] ?? '') => (float) ($course['price'] ?? 0)]);
+        $enrolledContents = array_map(function ($item) use ($pricesById) {
+            $item['price'] = $pricesById->get((string) ($item['courseId'] ?? ''), 0.0);
+
+            return $item;
+        }, $enrolledContents);
 
         // Fetch all classes
         $classesRes = $this->backendApi()->get("{$url}/classes", ['size' => 100]);

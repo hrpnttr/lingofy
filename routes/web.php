@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\ProfileController;
@@ -24,6 +25,7 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 Route::redirect('/course', '/courses');
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::post('/courses/{id}/enroll', [CourseController::class, 'enroll'])->name('courses.enroll');
+Route::post('/courses/{id}/checkout', [CheckoutController::class, 'store'])->name('courses.checkout');
 
 Route::get('/placement-tests', [QuizController::class, 'placementTests'])->name('placement-tests');
 

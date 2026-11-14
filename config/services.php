@@ -28,6 +28,19 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Shared secret sent to lingofy-backend on every request (X-Service-Token).
+    'backend' => [
+        'token' => env('BACKEND_SERVICE_TOKEN'),
+    ],
+
+    // Course payments. Keep disabled until a payment provider is integrated
+    // in App\Http\Controllers\CheckoutController.
+    'payments' => [
+        'enabled' => (bool) env('PAYMENTS_ENABLED', false),
+        'provider' => env('PAYMENTS_PROVIDER'),
+        'currency' => env('PAYMENTS_CURRENCY', 'USD'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

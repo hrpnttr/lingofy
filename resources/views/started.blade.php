@@ -43,13 +43,24 @@
                     >
                         Cancel
                     </a>
-                    <a
-                        href="{{ route('quizzes.show', $quiz->id) }}"
-                        class="bg-emerald-600 text-white px-8 py-3.5 rounded-xl shadow-md hover:bg-emerald-700 font-bold transition text-sm cursor-pointer"
-                    >
-                        Start Quiz &rarr;
-                    </a>
+                    @if($submission)
+                        <span class="bg-gray-100 text-gray-500 px-6 py-3.5 rounded-xl font-bold text-sm cursor-not-allowed" aria-disabled="true">
+                            Already submitted
+                        </span>
+                    @else
+                        <a
+                            href="{{ route('quizzes.show', $quiz->id) }}"
+                            class="bg-emerald-600 text-white px-8 py-3.5 rounded-xl shadow-md hover:bg-emerald-700 font-bold transition text-sm cursor-pointer"
+                        >
+                            Start Quiz &rarr;
+                        </a>
+                    @endif
                 </div>
+                @if($submission)
+                    <p class="mt-5 text-xs text-gray-500 leading-relaxed max-w-sm mx-auto">
+                        You already submitted this quiz{{ !empty($submission['submitted_at']) ? ' on ' . \Illuminate\Support\Carbon::parse($submission['submitted_at'])->format('M j, Y') : '' }}. Ask your teacher to reopen it if you need another attempt.
+                    </p>
+                @endif
             </div>
         @else
             <div class="p-8 text-center text-red-700 bg-red-50 border border-dashed border-red-200 rounded-2xl max-w-md mx-auto shadow-sm">

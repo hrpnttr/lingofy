@@ -52,17 +52,20 @@ class QuizController extends Controller
             ->first(fn ($q) => (string) ($q['class_id'] ?? '') === (string) $classId);
 
         $quiz = null;
+        $submission = null;
         if ($quizData) {
             $quiz = $this->studentQuiz($quizData);
+            $submission = $this->lockedSubmission($quiz->id);
         }
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'quiz' => $quiz,
+                'submission' => $submission,
             ]);
         }
 
-        return view('started', compact('quiz'));
+        return view('started', compact('quiz', 'submission'));
     }
 
     public function show(Request $request, $id)
@@ -82,6 +85,18 @@ class QuizController extends Controller
         }
 
         $quiz = $this->studentQuiz($response->json() ?? []);
+        $submission = $this->lockedSubmission($quiz->id);
+
+        if ($submission !== null) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'error' => 'You have already submitted this quiz.',
+                    'submission' => $submission,
+                ], 409);
+            }
+
+            return view('quiz_submitted', compact('quiz', 'submission'));
+        }
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -142,6 +157,13 @@ class QuizController extends Controller
             'responses' => $responses,
         ]);
 
+        if ($response->status() === 409) {
+            return response()->json([
+                'error' => $response->json('message') ?? 'You have already submitted this quiz.',
+                'code' => 'quiz_already_submitted',
+            ], 409);
+        }
+
         if ($response->status() === 422 || $response->status() === 404) {
             $body = $response->json() ?? [];
 
@@ -165,6 +187,29 @@ class QuizController extends Controller
             'points_max' => $resultData['points_max'] ?? null,
             'pending_review' => (bool) ($resultData['pending_review'] ?? false),
         ]);
+    }
+
+    /**
+     * The student's submission that blocks another attempt (class quizzes only), or null.
+     */
+    private function lockedSubmission(mixed $quizId): ?array
+    {
+        $studentId = Auth::guard('student')->id();
+        if ($studentId === null || $quizId === null) {
+            return null;
+        }
+
+        $url = env('BACKEND_API_URL', 'http://localhost:8000/api');
+        $response = $this->backendApi()->get("{$url}/add-quizzes/attempt-status", [
+            'studentId' => (string) $studentId,
+            'quiz_id' => (string) $quizId,
+        ]);
+
+        if (! $response->successful() || ! $response->json('submitted')) {
+            return null;
+        }
+
+        return $response->json('result') ?? [];
     }
 
     /**

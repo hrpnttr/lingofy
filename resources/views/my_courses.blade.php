@@ -53,6 +53,7 @@
                             @php
                                 $courseId = $courseItem['courseId'] ?? '';
                                 $courseTitle = $courseItem['title'] ?? 'Course';
+                                $coursePrice = (float) ($courseItem['price'] ?? 0);
                                 // Filter classes for this course
                                 $courseClasses = $classes->filter(function ($c) use ($courseId) {
                                     return (string) $c->course_id === (string) $courseId;
@@ -65,8 +66,15 @@
                                 <div
                                     class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex items-center justify-between">
                                     <div>
-                                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Active
-                                            Course</span>
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Active
+                                                Course</span>
+                                            @if ($coursePrice > 0)
+                                                <span class="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700">
+                                                    Paid · ${{ number_format($coursePrice, 2) }}
+                                                </span>
+                                            @endif
+                                        </div>
                                         <h2 class="text-2xl font-bold text-gray-900 mt-1 text-left">{{ $courseTitle }}</h2>
                                     </div>
                                     <span
